@@ -1,0 +1,24 @@
+- name: check 9200L for username
+  hosts: 192.168.134.72
+  connection: network_cli
+  gather_facts: true
+  tasks:
+    - name: Collect IOS facts
+      cisco.ios.ios_facts:
+        gather_subset: all
+      register: facts_result
+    - name: Display facts
+      debug:
+        msg:
+        - "Hostname: {{ ansible_facts['ansible_net_hostname'] }}"
+        - "Model: {{ ansible_facts['ansible_net_model'] }}"
+        - "Version: {{ ansible_facts['ansible_net_version'] }}"
+    - name: Run show usernames
+      cisco.ios.ios_command:
+        commands: show run | inc username
+      register: username_output
+    - name: Display username output
+      debug:
+        msg: "{{ username_output.stdout_lines }}"
+
+

@@ -1,0 +1,20 @@
+- name: Gather facts from 9200L
+  hosts: iosxe_9200L
+  connection: network_cli
+  gather_facts: false
+  tasks:
+    - name: Collect IOS facts
+      cisco.ios.ios_facts:
+        gather_subset: all
+      register: facts_result
+    - name: Display facts
+      debug:
+        msg:
+          - "Hostname: {{ facts_result.ansible_facts['ansible_net_hostname'] }}"
+          - "Model: {{ facts_result.ansible_facts['ansible_net_model'] }}"
+          - "Version: {{ facts_result.ansible_facts['ansible_net_version'] }}"
+    - name: Display interface descriptions
+      debug:
+        msg: "Interface {{ item.key }}: {{ item.value.description | default('No description') }}"
+      loop: "{{ facts_result.ansible_facts.ansible_net_interfaces | dict2items }}"
+       

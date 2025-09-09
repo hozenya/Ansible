@@ -1,0 +1,42 @@
+- name: Check and create username on cisco 9200L
+  hosts: 192.168.134.72
+  gather_facts: no # Do not collect facts on device
+  vars: # set variables to use to create new user
+    user_name: "hozenya"
+    user_privilege: 15
+    user_secret: 9
+    user_password: $9$iX1nQVkRUzUZv.$QwLKG2hdODVAy/Z.lD73MOoHQuSt6/F/OcKFUlo.A4E
+  tasks:
+    - name: Check if username exists
+      cisco.ios.ios_command: # sets to use commands
+        commands:
+          - show running-config | include username {{ user_name }} 
+      register: user_check 
+      failed_when: false
+    - name: Create username if not found
+      cisco.ios.ios_user: # sets to use user commands
+        name: "{{ user_name }}"
+        privilege: "{{ user_privilege }}"
+        password_type: secret
+        configured_password: "{{ user_password }}"
+        state: present
+      no_log: true #Suppress logging of sensitive data
+      when: user_check.stdout[0] is not search("username " + user_name)
+      register: user_create
+    - name: Save config if changed
+      cisco.ios.ios_command:
+        commands:
+          - write mem
+      when: user_create.changed
+    - name: Display username creation status
+      ansible.builtin.debug:
+        msg: User '{{ user_name }}' was {{ user_check.stdout[0] is search('username ' + user_name) | ternary('already present', 'created') }} on {{ inventory_hostname }}."
+    - name: Run updated usernames
+      cisco.ios.ios_command: # sets to use commands
+        commands:
+          - show running-config | include username
+      register: user_check_post # Stores findings from show command to user_check_post
+    - name: Display updated usernames 
+      ansible.builtin.debug: # Used to examine findings for user_check_post
+        msg: "{{ item }}" # makes each line in user_check_post an item
+      loop: "{{ user_check_post.stdout_lines[0] }}" # loops msg: for each item found
