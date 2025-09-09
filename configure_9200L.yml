@@ -1,5 +1,5 @@
 - name: check 9200L for username
-  hosts: 192.168.134.72
+  hosts: <IP_Address>
   connection: network_cli
   gather_facts: true
   tasks:
