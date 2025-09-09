@@ -1,11 +1,11 @@
 - name: Check and create username on cisco 9200L
-  hosts: 192.168.134.72
+  hosts: <IP_Address>
   gather_facts: no # Do not collect facts on device
   vars: # set variables to use to create new user
-    user_name: "hozenya"
+    user_name: "<name"
     user_privilege: 15
     user_secret: 9
-    user_password: $9$iX1nQVkRUzUZv.$QwLKG2hdODVAy/Z.lD73MOoHQuSt6/F/OcKFUlo.A4E
+    user_password: <passcode>
   tasks:
     - name: Check if username exists
       cisco.ios.ios_command: # sets to use commands
